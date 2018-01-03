@@ -1,0 +1,38 @@
+local function normalize_SDP(msg)
+	local sdp = msg:getSdp()
+	local m1 = sdp:getMediaDescription("audio")
+	if sdp 
+     	then
+		sdp = sdp:removeLine("b=", "TIAS")
+        	sdp = sdp:removeLine("b=", "AS")
+		sdp = sdp:removeLine("c=", "IP4 0.0.0.0")
+		msg:removeHeader("Call-Info")
+		local m1_port = string.match (m1, "m=audio (%d+) RTP/AVP")
+		local new_m1 =("m=audio " .. m1_port .. " RTP/AVP 8 101\r\na=rtpmap:8 PCMA/8000\r\na=rtpmap:101 telephone-event/8000\r\na=fmtp:101 0-15\r\n")
+        	sdp = sdp:modifyMediaDescription(1, new_m1)
+		sdp = sdp:removeMediaDescription("video")
+		msg:setSdp(sdp)
+    end
+end
+
+M = {}
+
+function M.outbound_ANY(msg)
+    normalize_SDP(msg)
+end
+
+function M.inbound_ANY(msg)
+    normalize_SDP(msg)
+end
+
+M.inbound_any  = normalize_SDP
+M.inbound_ACK          = normalize_SDP
+M.inbound_INVITE       = normalize_SDP
+M.inbound_UPDATE       = normalize_SDP
+M.inbound_200_INVITE   = normalize_SDP
+M.outbound_200_INVITE  = normalize_SDP
+M.outbound_ACK          = normalize_SDP
+M.outbound_INVITE       = normalize_SDP
+M.outbound_UPDATE       = normalize_SDP
+
+return M

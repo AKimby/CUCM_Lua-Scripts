@@ -1,0 +1,42 @@
+
+local function handle_sdp_bandwidth(msg)
+	local sdp = msg:getSdp()
+	if sdp
+		then
+		sdp = sdp:removeLine("b=", "TIAS")
+        	sdp = sdp:removeLine("b=", "AS")
+		sdp = sdp:gsub("RTP%/AVP 8 101 18 106", "RTP%/AVP 8 101")
+		sdp = sdp:gsub("RTP%/AVP 8 0 18 101", "RTP%/AVP 8 101")
+		sdp = sdp:gsub("101 G726%-32%/8000", "101 telephone%-event%/8000")
+		sdp = sdp:removeLine("a=rtpmap:106", "telephone-event")
+		sdp = sdp:removeLine("a=", "conversational")
+		sdp = sdp:removeLine("a=fmtp:18", "annexb=no")
+		sdp = sdp:removeLine("a=rtpmap:18", "G729/8000")
+		sdp = sdp:removeLine("a=rtpmap:0", "PCMU/8000")
+        msg:setSdp(sdp)
+    end
+end
+
+M = {}
+trace.enable()
+
+function M.outbound_ANY(msg)
+    handle_sdp_bandwidth(msg)
+end
+
+function M.inbound_ANY(msg)
+    handle_sdp_bandwidth(msg)
+end
+
+M.inbound_200_INVITE  = handle_sdp_bandwidth
+M.inbound_ACK          = handle_sdp_bandwidth
+M.inbound_INVITE       = handle_sdp_bandwidth
+M.inbound_UPDATE       = handle_sdp_bandwidth
+M.inbound_200_INVITE   = handle_sdp_bandwidth
+M.outbound_200_INVITE  = handle_sdp_bandwidth
+M.outbound_ACK          = handle_sdp_bandwidth
+M.outbound_INVITE       = handle_sdp_bandwidth
+M.outbound_UPDATE       = handle_sdp_bandwidth
+M.outbound_200_INVITE   = handle_sdp_bandwidth
+
+return M

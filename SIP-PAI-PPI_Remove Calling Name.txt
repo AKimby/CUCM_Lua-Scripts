@@ -1,0 +1,11 @@
+M={}
+trace.enable()
+function M.outbound_INVITE(msg)
+	local pai = msg:getHeader("P-Asserted-Identity")
+    	local uri = string.match(pai, "(<.+>)")
+    	msg:modifyHeader("P-Asserted-Identity", uri)
+	local from = msg:getHeader("From")
+    	local uri = string.match(from, "(<sip:.+)")
+    	msg:modifyHeader("From", uri)
+end
+return M

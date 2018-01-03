@@ -1,0 +1,8 @@
+M={}
+trace.enable()
+function M.outbound_INVITE(msg)	
+	local from = msg:getHeader("From")
+    	local uri = string.match(from, "(<sip:.+)")
+    	msg:modifyHeader("From", uri)
+end
+return M
